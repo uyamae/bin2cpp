@@ -1,4 +1,4 @@
-#include <fstream>
+ï»¿#include <fstream>
 #include <filesystem>
 #include <iostream>
 #include <string>
@@ -6,7 +6,7 @@
 #include <regex>
 
 /**
- * @brief “ü—ÍƒpƒX‚ğ³‹K•\Œ»‚É•ÏŠ·
+ * @brief å…¥åŠ›ãƒ‘ã‚¹ã‚’æ­£è¦è¡¨ç¾ã«å¤‰æ›
  */
 std::wregex regex_from_path(const std::filesystem::path& expected)
 {
@@ -23,31 +23,32 @@ std::wregex regex_from_path(const std::filesystem::path& expected)
     return std::move(std::wregex(pattern));
 }
 /**
- * @brief “ü—Í‚ªƒpƒ^[ƒ“‚Éˆê’v‚·‚é‚©‚Ç‚¤‚©
+ * @brief å…¥åŠ›ãŒãƒ‘ã‚¿ãƒ¼ãƒ³ã«ä¸€è‡´ã™ã‚‹ã‹ã©ã†ã‹
  */
 bool is_match(const std::wregex& expected, const std::filesystem::path& path)
 {
-    return std::regex_match(path.wstring(), expected);
+    return std::regex_search(path.wstring(), expected);
+//    return std::regex_match(path.wstring(), expected);
 }
 /**
- * @brief ƒoƒCƒiƒŠƒf[ƒ^ƒtƒ@ƒCƒ‹‚©‚çcpp ƒtƒ@ƒCƒ‹‚ğ¶¬
+ * @brief ãƒã‚¤ãƒŠãƒªãƒ‡ãƒ¼ã‚¿ãƒ•ã‚¡ã‚¤ãƒ«ã‹ã‚‰cpp ãƒ•ã‚¡ã‚¤ãƒ«ã‚’ç”Ÿæˆ
  */
 int convert_cpp(const std::filesystem::path& path)
 {
-    // ƒtƒ@ƒCƒ‹ƒTƒCƒYæ“¾
+    // ãƒ•ã‚¡ã‚¤ãƒ«ã‚µã‚¤ã‚ºå–å¾—
     auto size = std::filesystem::file_size(path);
-    // ƒtƒ@ƒCƒ‹‚ğŠJ‚­
+    // ãƒ•ã‚¡ã‚¤ãƒ«ã‚’é–‹ã
     std::ifstream ifs(path, std::ios_base::in | std::ios_base::binary);
     if (ifs.fail()) {
         return 2;
     }
-    // o—Íƒtƒ@ƒCƒ‹–¼
+    // å‡ºåŠ›ãƒ•ã‚¡ã‚¤ãƒ«å
     auto stem = path.stem().wstring();
     auto out_cpp_name = stem + L".cpp";
-    // ˆêo—Íƒtƒ@ƒCƒ‹
+    // ä¸€æ™‚å‡ºåŠ›ãƒ•ã‚¡ã‚¤ãƒ«
     auto tmp_cpp_path = std::filesystem::temp_directory_path() / out_cpp_name;
     std::wofstream ofs(tmp_cpp_path, std::ios_base::out);
-    // ƒwƒbƒ_ƒtƒ@ƒCƒ‹ƒpƒX
+    // ãƒ˜ãƒƒãƒ€ãƒ•ã‚¡ã‚¤ãƒ«ãƒ‘ã‚¹
     auto hpp_path = stem + L".h";
 
     ofs << L"#include <cstdint>" << std::endl;
@@ -70,73 +71,73 @@ int convert_cpp(const std::filesystem::path& path)
     }
     ofs << L"};" << std::endl;
     ofs.close();
-    // ˆêƒtƒ@ƒCƒ‹‚ğo—Íƒtƒ@ƒCƒ‹‚ÉˆÚ“®
+    // ä¸€æ™‚ãƒ•ã‚¡ã‚¤ãƒ«ã‚’å‡ºåŠ›ãƒ•ã‚¡ã‚¤ãƒ«ã«ç§»å‹•
     std::filesystem::rename(tmp_cpp_path, path.parent_path() / out_cpp_name);
 
     return 0;
 }
 /**
- * @brief ƒwƒbƒ_ƒtƒ@ƒCƒ‹‚ğo—Í
+ * @brief ãƒ˜ãƒƒãƒ€ãƒ•ã‚¡ã‚¤ãƒ«ã‚’å‡ºåŠ›
  */
 int convert_hpp(const std::filesystem::path& path)
 {
-    // o—Íƒtƒ@ƒCƒ‹–¼
+    // å‡ºåŠ›ãƒ•ã‚¡ã‚¤ãƒ«å
     auto stem = path.stem().wstring();
     auto out_hpp_name = stem + L".h";
-    // ƒtƒ@ƒCƒ‹ƒTƒCƒY
+    // ãƒ•ã‚¡ã‚¤ãƒ«ã‚µã‚¤ã‚º
     auto size = std::filesystem::file_size(path);
-    // ˆêo—Íƒtƒ@ƒCƒ‹
+    // ä¸€æ™‚å‡ºåŠ›ãƒ•ã‚¡ã‚¤ãƒ«
     auto tmp_hpp_path = std::filesystem::temp_directory_path() / out_hpp_name;
     std::wofstream ofs(tmp_hpp_path, std::ios_base::out);
-    // ƒwƒbƒ_‚Ì“à—e‚ğo—Í
+    // ãƒ˜ãƒƒãƒ€ã®å†…å®¹ã‚’å‡ºåŠ›
     ofs << L"#pragma once" << std::endl;
     ofs << L"constexpr size_t " << stem << L"_size{ " << size << L" };" << std::endl;
     ofs << L"extern const uint8_t " << stem << "[];" << std::endl;
     ofs.close();
-    // ˆêƒtƒ@ƒCƒ‹‚ğo—Íƒtƒ@ƒCƒ‹‚ÉˆÚ“®
+    // ä¸€æ™‚ãƒ•ã‚¡ã‚¤ãƒ«ã‚’å‡ºåŠ›ãƒ•ã‚¡ã‚¤ãƒ«ã«ç§»å‹•
     std::filesystem::rename(tmp_hpp_path, path.parent_path() / out_hpp_name);
     return 0;
 }
 /**
- * @brief “ü—ÍƒpƒX‚ğ•ÏŠ·
+ * @brief å…¥åŠ›ãƒ‘ã‚¹ã‚’å¤‰æ›
  */
 int convert(const std::filesystem::path& path)
 {
-    // ƒtƒ@ƒCƒ‹‚Ì‘¶İƒ`ƒFƒbƒN
+    // ãƒ•ã‚¡ã‚¤ãƒ«ã®å­˜åœ¨ãƒã‚§ãƒƒã‚¯
     if (!std::filesystem::exists(path)) {
         return 1;
     }
-    // cpp ƒtƒ@ƒCƒ‹
+    // cpp ãƒ•ã‚¡ã‚¤ãƒ«
     if (auto err = convert_cpp(path)) {
         return err;
     }
-    // hpp ƒtƒ@ƒCƒ‹
+    // hpp ãƒ•ã‚¡ã‚¤ãƒ«
     if (auto err = convert_hpp(path)) {
         return err;
     }
     return 0;
 }
 /**
- * @brief “ü—Í‚ğˆ—
+ * @brief å…¥åŠ›ã‚’å‡¦ç†
  */
 int process_input(std::string_view input)
 {
     int result = 0;
     std::filesystem::path input_path(input);
-    // ƒfƒBƒŒƒNƒgƒŠ‚Ì‘¶İŠm”F
+    // ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã®å­˜åœ¨ç¢ºèª
     std::filesystem::path dir = input_path.has_parent_path() ? input_path.parent_path() : ".";
     if (!std::filesystem::exists(dir)) {
         result = 1;
         return result;
     }
-    // ƒtƒ@ƒCƒ‹–¼‚ğƒpƒ^[ƒ“‰»
+    // ãƒ•ã‚¡ã‚¤ãƒ«åã‚’ãƒ‘ã‚¿ãƒ¼ãƒ³åŒ–
     auto pattern = regex_from_path(input_path.has_filename() ? input_path.filename() : L"*");
-    // ƒfƒBƒŒƒNƒgƒŠ“à‚Ìƒtƒ@ƒCƒ‹‚ğŒŸõ
+    // ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªå†…ã®ãƒ•ã‚¡ã‚¤ãƒ«ã‚’æ¤œç´¢
     for (auto& entry : std::filesystem::directory_iterator(dir)) {
         std::cout << entry << std::endl;
-        // ƒtƒ@ƒCƒ‹–¼‚ªw’èƒpƒ^[ƒ“‚Éƒ}ƒbƒ`‚µ‚Ä‚¢‚½‚ç
+        // ãƒ•ã‚¡ã‚¤ãƒ«åãŒæŒ‡å®šãƒ‘ã‚¿ãƒ¼ãƒ³ã«ãƒãƒƒãƒã—ã¦ã„ãŸã‚‰
         if (is_match(pattern, entry)) {
-            // ƒRƒ“ƒo[ƒgˆ—
+            // ã‚³ãƒ³ãƒãƒ¼ãƒˆå‡¦ç†
             if (auto err = convert(entry)) {
                 return err;
             }
